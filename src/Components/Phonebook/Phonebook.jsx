@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import styles from "./Phonebook.module.css";
+import { connect } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
 
-function Phonebook(props) {
+import { store } from "../../redux/store";
+
+import * as actions from "../../redux/actions";
+
+function Phonebook({ handleSubmit }) {
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
 
@@ -28,16 +34,31 @@ function Phonebook(props) {
     setNumber("");
   };
 
-  const handleSubmit = (e) => {
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   props.onSubmit({ name, number });
+  //   reset();
+  // };
+
+  const onSubmit = (e) => {
     e.preventDefault();
-    props.onSubmit({ name, number });
+    if (
+      store
+        .getState()
+        .contacts.map((contact) => contact.name)
+        .includes(name)
+    ) {
+      alert(`${name} is already exists in contacts`);
+      return;
+    }
+    handleSubmit({ id: uuidv4(), name, number });
     reset();
   };
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <form className={styles.form} onSubmit={handleSubmit}>
+      <form className={styles.form} onSubmit={onSubmit}>
         <label className={styles.label}>
           Name
           <input
@@ -65,5 +86,10 @@ function Phonebook(props) {
     </div>
   );
 }
+const mapStateToProps = (state) => state;
 
-export default Phonebook;
+const mapDispatchToProps = (dispatch) => ({
+  handleSubmit: (contact) => dispatch(actions.addContact(contact)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Phonebook);

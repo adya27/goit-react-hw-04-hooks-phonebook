@@ -1,20 +1,22 @@
-import PropTypes from 'prop-types';
+import { connect } from "react-redux";
+import store from "../../redux/store";
 
+import * as actions from "../../redux/actions";
 import Contact from "./Contact";
 
-function ContactList(props) {
+function ContactList({ contacts, onDeleteBtnClick }) {
   return (
     <div>
       <h2>Contacts</h2>
       <ul>
-        {props.contacts.map((contact) => {
+        {contacts.map((contact) => {
           return (
             <Contact
               key={contact.id}
               name={contact.name}
               number={contact.number}
               id={contact.id}
-              deleteBtn={props.onDeleteBtnClick}
+              deleteBtn={() => onDeleteBtnClick(contact.id)}
             />
           );
         })}
@@ -23,10 +25,14 @@ function ContactList(props) {
   );
 }
 
+const mapStateToProps = (state) => ({
+  contacts: state.contacts.filter((contact) =>
+    contact.name.toLowerCase().includes(state.filter)
+  ),
+});
 
-ContactList.propTypes = {
-  contacts: PropTypes.array.isRequired,
-  onDeleteBtnClick: PropTypes.func.isRequired
-}
+const mapDispatchToProps = (dispatch) => ({
+  onDeleteBtnClick: (id) => dispatch(actions.deleteContact(id)),
+});
 
-export default ContactList;
+export default connect(mapStateToProps, mapDispatchToProps)(ContactList);
